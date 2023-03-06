@@ -26,6 +26,8 @@ variable "aws_profile" {
   description = "(Required) AWS cli profile to be used for authentication with AWS"
 }
 
+data "aws_caller_identity" "current" {}
+
 variable "my_username" {
   type        = string
   description = "(Required) Username in the form of an email to be added to the tags and be declared as owner of the assets"
@@ -65,8 +67,33 @@ variable "db_name" {
   default     = "fleetmaintenance"
 }
 
+
+variable "databricks_users" {
+  description = <<EOT
+  List of Databricks users to be added at account-level for Unity Catalog.
+  Enter with square brackets and double quotes
+  e.g ["first.last@domain.com", "second.last@domain.com"]
+  EOT
+  type        = list(string)
+}
+
+variable "databricks_metastore_admins" {
+  description = <<EOT
+  List of Admins to be added at account-level for Unity Catalog.
+  Enter with square brackets and double quotes
+  e.g ["first.admin@domain.com", "second.admin@domain.com"]
+  EOT
+  type        = list(string)
+}
+
+variable "unity_admin_group" {
+  description = "Name of the admin group. This group will be set as the owner of the Unity Catalog metastore"
+  type        = string
+}
+
 locals {
   prefix                         = "demo-${random_string.naming.result}"
+  aws_account_id                 = data.aws_caller_identity.current.account_id
   rds_admin_username             = "admin${random_string.naming.result}"
   rds_admin_password             = resource.random_string.rds_admin_password.result
   service_principal_display_name = "Automation-only SP"

@@ -6,6 +6,7 @@ resource "aws_db_subnet_group" "this" {
 resource "aws_db_instance" "this" {
   allocated_storage      = 20
   identifier             = "${var.prefix}-mysql-db"
+  multi_az               = false
   db_name                = var.db_name
   engine                 = "mysql"
   engine_version         = "8.0.31"

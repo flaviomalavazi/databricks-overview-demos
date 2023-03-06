@@ -10,8 +10,8 @@ data "aws_iam_policy_document" "assume_role_for_ec2" {
 }
 
 resource "aws_iam_role" "aws_services_role" {
-  name        = "${local.prefix}-aws-services-role"
-  description = "Shared Role to access other AWS Services (s3, Kinesis...)"
+  name               = "${local.prefix}-aws-services-role"
+  description        = "Shared Role to access other AWS Services (s3, Kinesis...)"
   assume_role_policy = data.aws_iam_policy_document.assume_role_for_ec2.json
   tags               = local.tags
 }

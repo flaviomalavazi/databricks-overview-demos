@@ -9,7 +9,7 @@ module "vpc" {
   azs  = data.aws_availability_zones.available.names
   tags = var.tags
 
-  enable_dns_hostnames = false
+  enable_dns_hostnames = true
   enable_nat_gateway   = false
   single_nat_gateway   = false
   create_igw           = false
@@ -30,9 +30,9 @@ module "vpc" {
   }]
 }
 
-resource "aws_vpc_endpoint" "ec2" {
-  vpc_id            = module.vpc.vpc_id
-  service_name      = "com.amazonaws.${var.region}.ec2"
-  vpc_endpoint_type = "Interface"
-  tags              = var.tags
-}
+# resource "aws_vpc_endpoint" "ec2" {
+#   vpc_id            = module.vpc.vpc_id
+#   service_name      = "com.amazonaws.${var.region}.ec2"
+#   vpc_endpoint_type = "Interface"
+#   tags              = var.tags
+# }

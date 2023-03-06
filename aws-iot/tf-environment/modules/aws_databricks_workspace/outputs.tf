@@ -8,6 +8,5 @@ output "databricks_token" {
 }
 
 output "databricks_workspace_id" {
-  value     = databricks_mws_workspaces.this.workspace_id
-  sensitive = true
+  value = databricks_mws_workspaces.this.workspace_id
 }

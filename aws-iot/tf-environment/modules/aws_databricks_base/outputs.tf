@@ -13,6 +13,11 @@ output "subnets" {
   description = "private subnets for workspace creation"
 }
 
+output "vpc_main_route_table_id" {
+  value       = module.vpc.vpc_main_route_table_id
+  description = "ID for the main route table associated with this VPC"
+}
+
 output "root_bucket" {
   value       = aws_s3_bucket.root_storage_bucket.bucket
   description = "root bucket"

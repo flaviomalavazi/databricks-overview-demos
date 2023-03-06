@@ -2,7 +2,6 @@ module "aws_base" {
   providers = {
     databricks = databricks.mws
   }
-
   source     = "./modules/aws_databricks_base"
   tags       = local.tags
   prefix     = local.prefix
@@ -13,7 +12,8 @@ module "aws_base" {
 
 module "databricks_workspace" {
   providers = {
-    databricks = databricks.mws
+    databricks.mws       = databricks.mws
+    databricks.workspace = databricks.workspace
   }
   source                 = "./modules/aws_databricks_workspace"
   region                 = var.region
@@ -27,6 +27,24 @@ module "databricks_workspace" {
   tags                   = local.tags
   depends_on = [
     module.aws_base
+  ]
+}
+
+module "unity_catalog" {
+  source = "./modules/aws_databricks_unity_catalog"
+  providers = {
+    databricks.mws       = databricks.mws
+    databricks.workspace = databricks.workspace
+  }
+  region                   = var.region
+  databricks_account_id    = var.databricks_account_id
+  aws_account_id           = local.aws_account_id
+  prefix                   = local.prefix
+  tags                     = local.tags
+  unity_metastore_owner    = var.my_username
+  databricks_workspace_ids = [module.databricks_workspace.databricks_workspace_id]
+  depends_on = [
+    module.databricks_workspace
   ]
 }
 
@@ -47,3 +65,4 @@ module "demo_rds" {
   db_name                = var.db_name
   vpc_security_group_ids = module.aws_base.security_group_ids
 }
+
