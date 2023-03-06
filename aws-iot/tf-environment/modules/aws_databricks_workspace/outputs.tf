@@ -8,13 +8,6 @@ output "databricks_token" {
 }
 
 output "databricks_workspace_id" {
-  value = databricks_mws_workspaces.this.workspace_id
-}
-
-output "databricks_metastore_id" {
-  value = resource.databricks_metastore.this.id
-}
-
-output "vpc_security_group_ids" {
-  value = [module.vpc.default_security_group_id]
+  value     = databricks_mws_workspaces.this.workspace_id
+  sensitive = true
 }

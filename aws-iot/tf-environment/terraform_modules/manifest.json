@@ -1,1 +1,0 @@
-{"Modules":[{"Key":"databricks_workspace","Source":"../../modules/databricks_workspace/","Dir":"../../modules/databricks_workspace"},{"Key":"databricks_workspace.vpc","Source":"registry.terraform.io/terraform-aws-modules/vpc/aws","Version":"2.70.0","Dir":".infracost/terraform_modules/databricks_workspace.vpc"}]}
