@@ -15,7 +15,7 @@ resource "aws_db_instance" "this" {
   password               = var.rds_admin_password
   parameter_group_name   = "default.mysql8.0"
   skip_final_snapshot    = true
-  db_subnet_group_name   = resource.aws_db_subnet_group.this.name
+  db_subnet_group_name   = resource.aws_db_subnet_group.this.id
   vpc_security_group_ids = [module.vpc.default_security_group_id]
   tags                   = merge(var.tags, { Name = "${var.prefix}-db" })
 }

@@ -38,3 +38,8 @@ variable "vpc_security_group_ids" {
   type        = list(string)
   description = "(Required) List of security group IDs that will be associated with the RDS"
 }
+
+locals {
+  public_subnets = [cidrsubnet(var.rds_cidr_block, 3, 0)]
+  private_subnets = [cidrsubnet(var.rds_cidr_block, 3, 1), cidrsubnet(var.rds_cidr_block, 3, 2)]
+}

@@ -18,6 +18,11 @@ output "vpc_main_route_table_id" {
   description = "ID for the main route table associated with this VPC"
 }
 
+output "private_route_table_ids" {
+  value       = module.vpc.private_route_table_ids
+  description = "IDs for the private route tables associated with this VPC"
+}
+
 output "root_bucket" {
   value       = aws_s3_bucket.root_storage_bucket.bucket
   description = "root bucket"
