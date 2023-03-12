@@ -43,6 +43,12 @@ variable "databricks_sp_oauth_secret" {
   description = "(Required) Service Principal OAuth client secret to authenticate with Databricks"
 }
 
+variable "databricks_sp_name" {
+  type        = string
+  description = "(Required) Databricks Service Principal name"
+}
+
+
 variable "databricks_account_id" {
   type        = string
   description = "(Required) Databricks Account ID"
@@ -90,12 +96,19 @@ variable "unity_admin_group" {
   description = "Name of the admin group. This group will be set as the owner of the Unity Catalog metastore"
   type        = string
 }
+variable "bucket_name" {
+  type        = string
+  description = "(Optional) Name for the bucket managed by this module"
+  default     = null
+}
 
 locals {
   prefix                         = "demo-${random_string.naming.result}"
+  unity_admin_group              = "${local.prefix}-${var.unity_admin_group}"
   aws_account_id                 = data.aws_caller_identity.current.account_id
   rds_admin_username             = "admin${random_string.naming.result}"
   rds_admin_password             = resource.random_string.rds_admin_password.result
+  bucket_name                    = var.bucket_name == null ? "demo-${resource.random_string.naming.result}-s3-bucket" : var.bucket_name
   service_principal_display_name = "Automation-only SP"
   tags                           = merge(var.tags, { Owner = split("@", var.my_username)[0], ownerEmail = var.my_username })
 }

@@ -2,7 +2,7 @@ module "aws_base" {
   providers = {
     databricks = databricks.mws
   }
-  source     = "./modules/aws_databricks_base"
+  source     = "../modules/aws_databricks_base"
   tags       = local.tags
   prefix     = local.prefix
   cidr_block = var.cidr_block
@@ -15,7 +15,7 @@ module "databricks_workspace" {
     databricks.mws       = databricks.mws
     databricks.workspace = databricks.workspace
   }
-  source                 = "./modules/aws_databricks_workspace"
+  source                 = "../modules/aws_databricks_workspace"
   region                 = var.region
   databricks_account_id  = var.databricks_account_id
   security_group_ids     = module.aws_base.security_group_ids
@@ -31,7 +31,7 @@ module "databricks_workspace" {
 }
 
 module "unity_catalog" {
-  source = "./modules/aws_databricks_unity_catalog"
+  source = "../modules/aws_databricks_unity_catalog"
   providers = {
     databricks.mws       = databricks.mws
     databricks.workspace = databricks.workspace
@@ -41,21 +41,29 @@ module "unity_catalog" {
   aws_account_id           = local.aws_account_id
   prefix                   = local.prefix
   tags                     = local.tags
-  unity_metastore_owner    = var.my_username
+  unity_metastore_owner    = local.unity_admin_group
   databricks_workspace_ids = [module.databricks_workspace.databricks_workspace_id]
   depends_on = [
-    module.databricks_workspace
+    module.databricks_workspace,
+    resource.databricks_group.admin_group
   ]
 }
 
 module "demo_kinesis" {
-  source = "./modules/kinesis"
+  source = "../modules/kinesis"
   tags   = local.tags
   prefix = local.prefix
 }
 
+
+module "demo_s3" {
+  source      = "../modules/s3_bucket"
+  bucket_name = local.bucket_name
+  tags        = local.tags
+}
+
 module "demo_rds" {
-  source                 = "./modules/rds"
+  source                 = "../modules/rds"
   tags                   = local.tags
   prefix                 = local.prefix
   region                 = var.region

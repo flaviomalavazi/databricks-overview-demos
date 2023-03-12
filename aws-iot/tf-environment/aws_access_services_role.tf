@@ -1,5 +1,6 @@
 data "aws_iam_policy_document" "assume_role_for_ec2" {
   statement {
+    sid     = "AllowEC2ToAssumeRole"
     effect  = "Allow"
     actions = ["sts:AssumeRole"]
     principals {
@@ -7,6 +8,24 @@ data "aws_iam_policy_document" "assume_role_for_ec2" {
       type        = "Service"
     }
   }
+
+  statement {
+    sid     = "AllowUnityCatalogToAssumeRole"
+    effect  = "Allow"
+    actions = ["sts:AssumeRole"]
+    principals {
+      type = "AWS"
+      identifiers = [
+        "arn:aws:iam::414351767826:role/unity-catalog-prod-UCMasterRole-14S5ZJVKOTYTL",
+      "arn:aws:iam::${local.aws_account_id}:role/${local.prefix}-aws-services-role"]
+    }
+    condition {
+      test     = "StringEquals"
+      variable = "sts:ExternalId"
+      values   = [var.databricks_account_id]
+    }
+  }
+
 }
 
 resource "aws_iam_role" "aws_services_role" {
@@ -25,6 +44,27 @@ data "aws_iam_policy_document" "aws_services_role_policy_document" {
     actions   = ["kinesis:Get*", "kinesis:DescribeStream", "kinesis:PutRecord", "kinesis:PutRecords"]
     resources = [module.demo_kinesis.kinesis_stream_arn]
   }
+
+  statement {
+    sid    = "s3AccessWithUC"
+    effect = "Allow"
+    actions = ["s3:GetObject",
+      "s3:PutObject",
+      "s3:DeleteObject",
+      "s3:ListBucket",
+      "s3:GetBucketLocation",
+      "s3:GetLifecycleConfiguration",
+      "s3:PutLifecycleConfiguration"
+    ]
+    resources = ["${module.demo_s3.s3_bucket_arn}", "${module.demo_s3.s3_bucket_arn}/*"]
+  }
+
+  statement {
+    sid       = "allowUCAssumeRole"
+    effect    = "Allow"
+    actions   = ["sts:AssumeRole"]
+    resources = ["arn:aws:iam::${local.aws_account_id}:role/${local.prefix}-aws-services-role"]
+  }
 }
 
 resource "aws_iam_role_policy" "aws_services_role_policy" {
@@ -34,11 +74,6 @@ resource "aws_iam_role_policy" "aws_services_role_policy" {
 }
 
 resource "aws_iam_instance_profile" "shared" {
-  name = "shared-instance-profile"
+  name = "${local.prefix}-shared-instance-profile"
   role = aws_iam_role.aws_services_role.name
-}
-
-resource "databricks_instance_profile" "shared" {
-  provider             = databricks.workspace
-  instance_profile_arn = aws_iam_instance_profile.shared.arn
 }

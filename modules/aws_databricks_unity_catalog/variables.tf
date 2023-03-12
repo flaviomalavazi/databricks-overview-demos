@@ -34,3 +34,13 @@ variable "unity_metastore_owner" {
   description = "(Required) Name of the principal that will be the owner of the Metastore"
   type        = string
 }
+
+variable "metastore_name" {
+  description = "(Optional) Name of the metastore that will be created"
+  type        = string
+  default     = null
+}
+
+locals {
+  metastore_name = var.metastore_name == null ? "${var.prefix}-metastore" : var.metastore_name
+}

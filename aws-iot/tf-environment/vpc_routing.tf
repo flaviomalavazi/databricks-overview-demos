@@ -28,10 +28,10 @@ resource "aws_route" "rds_to_db" {
 }
 
 resource "aws_security_group_rule" "example" {
-  type                     = "ingress"
-  cidr_blocks              = [var.cidr_block]
-  to_port                  = 3306
-  from_port                = 3306
-  protocol                 = "tcp"
-  security_group_id        = module.demo_rds.security_group_ids[0]
+  type              = "ingress"
+  cidr_blocks       = [var.cidr_block]
+  to_port           = 3306
+  from_port         = 3306
+  protocol          = "tcp"
+  security_group_id = module.demo_rds.security_group_ids[0]
 }
