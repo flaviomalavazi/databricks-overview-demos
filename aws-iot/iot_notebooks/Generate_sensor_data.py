@@ -67,7 +67,7 @@ class kinesisProducer():
 
 # COMMAND ----------
 
-kinesis = kinesisProducer(stream_name = dbutils.secrets.get("firehose_scope", "firehose_stream_name"), region_name = "us-west-1")
+kinesis = kinesisProducer(stream_name = dbutils.secrets.get("kinesis_scope", "kinesis_stream_name"), region_name = "us-west-1")
 
 # COMMAND ----------
 
@@ -105,3 +105,30 @@ for i in range(1,1000):
         sleep(0.1)
 
 print(f"Done streaming at: {datetime.now()}")
+
+# COMMAND ----------
+
+stream_name = dbutils.secrets.get("kinesis_scope", "kinesis_stream_name")
+region_name = "us-west-1"
+
+# COMMAND ----------
+
+spark.conf.set("spark.databricks.kinesis.listShards.enabled", "false")
+
+# COMMAND ----------
+
+kinesisDF = (spark.readStream
+  .format("kinesis")
+  .option("streamName", stream_name)
+  .option("region", region_name)
+  .option("initialPosition", "earliest")
+  .load())
+
+# COMMAND ----------
+
+kinesisDF.display()
+
+# COMMAND ----------
+
+# MAGIC %sql
+# MAGIC select * from temporaria
