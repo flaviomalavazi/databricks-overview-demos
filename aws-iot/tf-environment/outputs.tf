@@ -42,3 +42,11 @@ output "kinesis_stream_name" {
   value       = module.demo_kinesis.kinesis_stream_name
   description = "Name of the kinesis stream"
 }
+
+output "aws_services_role_arn" {
+  value = resource.aws_iam_role.aws_services_role.arn
+}
+
+output "aws_services_role_name" {
+  value = resource.aws_iam_role.aws_services_role.name
+}

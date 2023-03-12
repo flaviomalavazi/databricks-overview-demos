@@ -25,7 +25,7 @@ data "databricks_spark_version" "latest_version" {
 #   JSON
 # }
 
-resource "databricks_cluster" "first_cluster" {
+resource "databricks_cluster" "unity_catalog_cluster" {
   provider                    = databricks.workspace
   cluster_name                = "Demo Cluster"
   spark_version               = data.databricks_spark_version.latest_version.id
@@ -56,14 +56,47 @@ resource "databricks_cluster" "first_cluster" {
     "spark.databricks.unityCatalog.userIsolation.python.preview" : true
   }
 
-  # library {
-  #   pypi {
-  #     package = "sqlalchemy"
-  #   }
-  # }
+  custom_tags = {
+    "ClusterScope" = "Initial Demo"
+  }
+
+}
+
+
+resource "databricks_cluster" "streaming_cluster" {
+  provider                    = databricks.workspace
+  cluster_name                = "Demo Cluster"
+  spark_version               = data.databricks_spark_version.latest_version.id
+  node_type_id                = data.databricks_node_type.smallest.id
+  apply_policy_default_values = true
+  data_security_mode          = "NONE"
+  autotermination_minutes     = 120
+  aws_attributes {
+    availability           = "SPOT"
+    instance_profile_arn   = resource.aws_iam_instance_profile.shared.arn
+    first_on_demand        = 1
+    spot_bid_price_percent = 100
+  }
+
+  depends_on = [
+    module.databricks_workspace
+  ]
+
+  autoscale {
+    min_workers = 1
+    max_workers = 2
+  }
+
+  spark_conf = {
+    "spark.databricks.io.cache.enabled" : true,
+    "spark.databricks.io.cache.maxDiskUsage" : "50g",
+    "spark.databricks.io.cache.maxMetaDataCache" : "1g",
+    "spark.databricks.unityCatalog.userIsolation.python.preview" : true
+  }
 
   custom_tags = {
     "ClusterScope" = "Initial Demo"
   }
 
 }
+

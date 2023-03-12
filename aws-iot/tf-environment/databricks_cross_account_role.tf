@@ -5,6 +5,7 @@ variable "bootstrap" {
 }
 
 data "databricks_aws_assume_role_policy" "this" {
+  provider    = databricks.mws
   external_id = var.databricks_account_id
 }
 
@@ -36,6 +37,7 @@ data "aws_iam_policy_document" "serverless_assume_role_policy" {
 } # ${module.databricks_workspace.databricks_workspace_id}
 
 data "databricks_aws_crossaccount_policy" "this" {
+  provider = databricks.mws
 }
 
 data "aws_iam_policy_document" "this" {
