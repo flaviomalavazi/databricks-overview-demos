@@ -65,7 +65,7 @@ resource "databricks_cluster" "unity_catalog_cluster" {
 
 resource "databricks_cluster" "streaming_cluster" {
   provider                    = databricks.workspace
-  cluster_name                = "Demo Cluster"
+  cluster_name                = "Streaming Cluster"
   spark_version               = data.databricks_spark_version.latest_version.id
   node_type_id                = data.databricks_node_type.smallest.id
   apply_policy_default_values = true
@@ -84,7 +84,7 @@ resource "databricks_cluster" "streaming_cluster" {
 
   autoscale {
     min_workers = 1
-    max_workers = 2
+    max_workers = 3
   }
 
   spark_conf = {

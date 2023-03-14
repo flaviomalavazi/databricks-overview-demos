@@ -96,15 +96,23 @@ variable "unity_admin_group" {
   description = "Name of the admin group. This group will be set as the owner of the Unity Catalog metastore"
   type        = string
 }
+
 variable "bucket_name" {
   type        = string
   description = "(Optional) Name for the bucket managed by this module"
   default     = null
 }
 
+variable "aws_access_services_role_name" {
+  type        = string
+  description = "(Optional) Name for the AWS Services role by this module"
+  default     = null
+}
 locals {
   prefix                         = "demo-${random_string.naming.result}"
   unity_admin_group              = "${local.prefix}-${var.unity_admin_group}"
+  aws_access_services_role_name  = var.aws_access_services_role_name == null ? "${local.prefix}-aws-services-role" : "${local.prefix}-${var.aws_access_services_role_name}"
+  aws_access_services_role_arn   = "arn:aws:iam::${local.aws_account_id}:role/${local.aws_access_services_role_name}"
   aws_account_id                 = data.aws_caller_identity.current.account_id
   rds_admin_username             = "admin${random_string.naming.result}"
   rds_admin_password             = resource.random_string.rds_admin_password.result

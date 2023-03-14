@@ -46,8 +46,12 @@ data "aws_iam_policy_document" "this" {
     sid       = "allowPassCrossServiceRole"
     effect    = "Allow"
     actions   = ["iam:PassRole"]
-    resources = [resource.aws_iam_role.aws_services_role.arn]
+    resources = [local.aws_access_services_role_arn]
   }
+
+  depends_on = [
+    resource.aws_iam_role.aws_services_role
+  ]
 }
 
 resource "aws_iam_role_policy" "this" {

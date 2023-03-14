@@ -21,10 +21,6 @@
 
 # COMMAND ----------
 
-from pyspark.sql.utils import AnalysisException
-
-# COMMAND ----------
-
 driver = "org.mariadb.jdbc.Driver"
 
 database_host = dbutils.secrets.get("rds_scope", "host")
@@ -95,20 +91,11 @@ for table in tables:
 
 # COMMAND ----------
 
-try:
-    spark.sql(f"CREATE CATALOG IF NOT EXISTS landing;")
-    spark.sql("USE CATALOG landing")
-    spark.sql(f"CREATE SCHEMA IF NOT EXISTS {target_database}_raw;")
-    spark.sql(f"USE SCHEMA {target_database}_raw")
-except AnalysisException as e:
-    if "[UC_NOT_ENABLED] Unity Catalog is not enabled on this cluster." in str(e):
-        spark.sql(f"CREATE SCHEMA IF NOT EXISTS {target_database}_raw")
-
-# COMMAND ----------
-
 number_of_tables = len(tables)
-print(f"Saving {number_of_tables} tables to the Landing Zone...")
-
+print(f"Saving {number_of_tables} tables to Unity Catalog...")
+spark.sql("CREATE CATALOG IF NOT EXISTS landing;")
+spark.sql("USE CATALOG landing;")
+spark.sql(f"CREATE SCHEMA IF NOT EXISTS {target_database}_raw;")
+spark.sql(f"USE SCHEMA {target_database}_raw;")
 for table in tableData.keys():
-    tableData[table]['data'].write.format("delta").option("mergeSchema", "true").mode("append").save(f"{bronze_path}/{database_name}/{table}")
-    spark.sql(f"CREATE TABLE IF NOT EXISTS {target_database}_raw.{table} USING DELTA LOCATION '{bronze_path}/{database_name}/{table}'")
+    tableData[table]['data'].write.mode("overwrite").saveAsTable(table)

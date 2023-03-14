@@ -15,13 +15,12 @@ logging.basicConfig(level=logging.INFO)
 # COMMAND ----------
 
 from json import dumps
+import boto3
 from datetime import datetime
 from random import gauss, choice
+from time import sleep
 
 class kinesisProducer():
-    from json import dumps
-    from datetime import datetime
-    from random import gauss, choice
     
     def __init__(self, stream_name: str, region_name: str):
         self.client = boto3.client("kinesis",
@@ -64,6 +63,14 @@ class kinesisProducer():
             self.put_kinesis_record(measurement = self.generate_weather_message())
         else:
             pass
+          
+    def put_set_of_messages(self):
+        turbine_measurements = 0
+        while turbine_measurements <= 10:
+            self.put_message(message_type="turbine")
+            turbine_measurements = turbine_measurements + 1
+            sleep(0.1)
+        self.put_message(message_type="weather")
 
 # COMMAND ----------
 
@@ -71,64 +78,7 @@ kinesis = kinesisProducer(stream_name = dbutils.secrets.get("kinesis_scope", "ki
 
 # COMMAND ----------
 
-session = boto3.Session(region_name="us-west-1")
-credentials = session.get_credentials()
-# credentials = credentials.get_frozen_credentials()
-
-# COMMAND ----------
-
-type(credentials)
-
-# COMMAND ----------
-
-a = 10
+a = 10000
 while (a>=0):
-    turbine_measurements = 0
-    while turbine_measurements <= 10:
-        kinesis.put_message(message_type="turbine")
-        turbine_measurements = turbine_measurements + 1
-    kinesis.put_message(message_type="weather")
-    a = a-1
-
-# COMMAND ----------
-
-print(f"Begin streaming at: {datetime.now()}")
-for i in range(1,1000):
-    for meter in meters:
-        measurement = meter.measure()
-        if measurement != {}:
-            client.put_record(
-                StreamName=secrets.kinesisStreamName,
-                Data=(json.dumps(measurement) + "\n"),
-                PartitionKey=datetime.strftime(datetime.now(), "%Y%m%d")
-            )
-        sleep(0.1)
-
-print(f"Done streaming at: {datetime.now()}")
-
-# COMMAND ----------
-
-stream_name = dbutils.secrets.get("kinesis_scope", "kinesis_stream_name")
-region_name = "us-west-1"
-
-# COMMAND ----------
-
-spark.conf.set("spark.databricks.kinesis.listShards.enabled", "false")
-
-# COMMAND ----------
-
-kinesisDF = (spark.readStream
-  .format("kinesis")
-  .option("streamName", stream_name)
-  .option("region", region_name)
-  .option("initialPosition", "earliest")
-  .load())
-
-# COMMAND ----------
-
-kinesisDF.display()
-
-# COMMAND ----------
-
-# MAGIC %sql
-# MAGIC select * from temporaria
+    kinesis.put_set_of_messages()
+    a = a - 1

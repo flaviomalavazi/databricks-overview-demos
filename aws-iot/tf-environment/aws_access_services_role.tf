@@ -17,7 +17,7 @@ data "aws_iam_policy_document" "assume_role_for_ec2" {
       type = "AWS"
       identifiers = [
         "arn:aws:iam::414351767826:role/unity-catalog-prod-UCMasterRole-14S5ZJVKOTYTL",
-      "arn:aws:iam::${local.aws_account_id}:role/${local.prefix}-aws-services-role"]
+      local.aws_access_services_role_arn]
     }
     condition {
       test     = "StringEquals"
@@ -29,7 +29,7 @@ data "aws_iam_policy_document" "assume_role_for_ec2" {
 }
 
 resource "aws_iam_role" "aws_services_role" {
-  name               = "${local.prefix}-aws-services-role"
+  name               = "${local.aws_access_services_role_name}"
   description        = "Shared Role to access other AWS Services (s3, Kinesis...)"
   assume_role_policy = data.aws_iam_policy_document.assume_role_for_ec2.json
   tags               = local.tags
@@ -67,8 +67,9 @@ data "aws_iam_policy_document" "aws_services_role_policy_document" {
     sid       = "allowUCAssumeRole"
     effect    = "Allow"
     actions   = ["sts:AssumeRole"]
-    resources = ["arn:aws:iam::${local.aws_account_id}:role/${local.prefix}-aws-services-role"]
+    resources = [local.aws_access_services_role_arn]
   }
+
 }
 
 resource "aws_iam_role_policy" "aws_services_role_policy" {

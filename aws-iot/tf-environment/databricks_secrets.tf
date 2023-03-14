@@ -77,3 +77,25 @@ resource "databricks_secret" "stream_name" {
   scope        = databricks_secret_scope.kinesis.id
 }
 
+
+resource "databricks_secret_scope" "s3_scope" {
+  provider = databricks.workspace
+  name     = "demo_s3"
+}
+
+resource "databricks_secret_acl" "s3_acl" {
+  provider   = databricks.workspace
+  principal  = resource.databricks_group.workspace_level_group.display_name
+  scope      = databricks_secret_scope.s3_scope.name
+  permission = "READ"
+  depends_on = [
+    resource.databricks_group.workspace_level_group
+  ]
+}
+
+resource "databricks_secret" "s3_name" {
+  provider     = databricks.workspace
+  key          = "bucket_name"
+  string_value = local.bucket_name
+  scope        = databricks_secret_scope.s3_scope.id
+}
