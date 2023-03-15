@@ -1,4 +1,3 @@
-
 resource "databricks_instance_profile" "shared" {
   provider             = databricks.workspace
   instance_profile_arn = resource.aws_iam_instance_profile.shared.arn
@@ -17,13 +16,6 @@ data "databricks_spark_version" "latest_version" {
   long_term_support = true
   depends_on        = [module.databricks_workspace]
 }
-
-
-# resource "databricks_cluster_policy" "default_data_access_policy" {
-#   name = "Data-Access-Cluster-Policy"
-#   definition = <<JSON
-#   JSON
-# }
 
 resource "databricks_cluster" "unity_catalog_cluster" {
   provider                    = databricks.workspace
@@ -100,3 +92,20 @@ resource "databricks_cluster" "streaming_cluster" {
 
 }
 
+
+# resource "databricks_sql_endpoint" "demo_sql_warehouse" {
+#   provider         = databricks.workspace
+#   name             = "Demo Warehouse"
+#   cluster_size     = "X-Small"
+#   warehouse_type   = "PRO"
+#   max_num_clusters = 1
+#   auto_stop_mins   = 30
+
+#   tags {
+#     custom_tags {
+#       key   = "clusterUsage"
+#       value = "SQL"
+#     }
+#   }
+
+# }

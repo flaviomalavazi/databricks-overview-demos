@@ -100,9 +100,17 @@ try:
     spark.sql("USE CATALOG landing")
     spark.sql(f"CREATE SCHEMA IF NOT EXISTS {target_database}_raw;")
     spark.sql(f"USE SCHEMA {target_database}_raw")
+    print("Using UC Location")
+    uc_usage = True
 except AnalysisException as e:
     if "[UC_NOT_ENABLED] Unity Catalog is not enabled on this cluster." in str(e):
+        print("Not Using UC Location")
         spark.sql(f"CREATE SCHEMA IF NOT EXISTS {target_database}_raw")
+        uc_usage = False
+
+# COMMAND ----------
+
+bronze_path
 
 # COMMAND ----------
 
@@ -110,5 +118,12 @@ number_of_tables = len(tables)
 print(f"Saving {number_of_tables} tables to the Landing Zone...")
 
 for table in tableData.keys():
-    tableData[table]['data'].write.format("delta").option("mergeSchema", "true").mode("append").save(f"{bronze_path}/{database_name}/{table}")
-    spark.sql(f"CREATE TABLE IF NOT EXISTS {target_database}_raw.{table} USING DELTA LOCATION '{bronze_path}/{database_name}/{table}'")
+    # UC Location
+    if uc_usage:
+        # Saving to UC external location and to a schema in the UC Catalog Database
+        tableData[table]['data'].write.format("delta").option("mergeSchema", "true").mode("append").save(f"{bronze_path}/{database_name}/{table}")
+        spark.sql(f"CREATE TABLE IF NOT EXISTS {target_database}_raw.{table} USING DELTA LOCATION '{bronze_path}/{database_name}/{table}'")
+    else:
+        # Non UC Location
+        tableData[table]['data'].write.format("delta").option("mergeSchema", "true").mode("append").save(f"{bronze_path}/{database_name}/{table}")
+        spark.sql(f"CREATE TABLE IF NOT EXISTS {target_database}_raw.{table} USING DELTA LOCATION '{bronze_path}/{database_name}/{table}'")

@@ -7,6 +7,7 @@ import pyspark.sql.functions as F
 from pyspark.sql.types import *
 from pyspark.sql.utils import AnalysisException
 from datetime import datetime
+from time import sleep
 import json
 
 # COMMAND ----------
@@ -31,7 +32,7 @@ def get_last_reading(path: str) -> str:
         last_reading = spark.read.format("delta").load(f"{path}").select(F.max("approximateArrivalTimestamp").alias("last_reading")).collect()[0]["last_reading"]
         return last_reading
     except AnalysisException as e:
-        if f"[PATH_NOT_FOUND] Path does not exist: {path}" in str(e):
+        if ((f"[PATH_NOT_FOUND] Path does not exist: {path}" in str(e)) or ("[UNRESOLVED_COLUMN.WITHOUT_SUGGESTION] A column or function parameter with name `approximateArrivalTimestamp` cannot be resolved" in str(e))):
             return last_reading
         else:
             raise e
@@ -64,7 +65,7 @@ initial_position
 
 # COMMAND ----------
 
-kinesis_stream_options = {
+  kinesis_stream_options = {
     "streamName": dbutils.secrets.get("kinesis_scope", "kinesis_stream_name"),
     "region": "us-west-1",
     "initialPosition": initial_position
@@ -110,6 +111,7 @@ weatherDF = (
 write_turbine_to_delta = (
     turbineDF
     .writeStream.format('delta')                                                  # Write our stream to the Delta format
+    .option("mergeSchema", "true")
     .option("checkpointLocation", f"{path_to_checkpoints}/{turbine_path}")     # Checkpoint so we can restart streams gracefully
     .start(f"{bronze_path}{turbine_path}")                                         # Stream the data into an S3 Path
 )
@@ -119,6 +121,7 @@ write_turbine_to_delta = (
 write_weather_to_delta = (
       weatherDF
     .writeStream.format('delta')                                                  # Write our stream to the Delta format
+    .option("mergeSchema", "true")
     .option("checkpointLocation", f"{path_to_checkpoints}/{weather_path}")     # Checkpoint so we can restart streams gracefully
     .start(f"{bronze_path}{weather_path}")                                         # Stream the data into an S3 Path
 )
@@ -153,11 +156,11 @@ while True:
 
 # COMMAND ----------
 
-spark.sql(f"select * from {target_database}_raw.turbine_sensor").display()
+spark.sql(f"select * from {target_database}_raw.turbine_sensor").limit(10).display()
 
 # COMMAND ----------
 
-spark.sql(f"select * from {target_database}_raw.weather_sensor").display()
+spark.sql(f"select * from {target_database}_raw.weather_sensor").limit(10).display()
 
 # COMMAND ----------
 
@@ -221,16 +224,19 @@ weather_bronze_to_silver = (
 
 # COMMAND ----------
 
-spark.sql(f"select * from delta.`{silver_path}/turbine_sensor_agg`").limit(10).display()
-
-# COMMAND ----------
-
-# spark.sql(f"DROP TABLE IF EXISTS {target_database}.turbine_sensor_agg")
-# spark.sql(f"DROP TABLE IF EXISTS {target_database}.weather_sensor_agg")
+while True:
+    try:
+        spark.sql(f"select * from delta.`{silver_path}/turbine_sensor_agg`").limit(10).display()
+        break
+    except AnalysisException as e:
+        if f"Delta table `{silver_path}/turbine_sensor_agg` doesn't exist":
+            sleep(3)
 
 # COMMAND ----------
 
 # Create the external tables once data starts to stream in
+spark.sql(f"CREATE SCHEMA IF NOT EXISTS {target_database};")
+
 while True:
     try:
         spark.sql(f'CREATE TABLE IF NOT EXISTS hive_metastore.{target_database}.turbine_sensor_agg USING DELTA LOCATION "{silver_path}/turbine_sensor_agg"')
@@ -249,8 +255,8 @@ while True:
 
 # COMMAND ----------
 
-spark.sql(f"select * from {target_database}.turbine_sensor_agg").display()
+spark.sql(f"select * from {target_database}.turbine_sensor_agg").limit(10).display()
 
 # COMMAND ----------
 
-spark.sql(f"select * from {target_database}.weather_sensor_agg").display()
+spark.sql(f"select * from {target_database}.weather_sensor_agg").limit(10).display()

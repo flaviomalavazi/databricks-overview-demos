@@ -1,4 +1,8 @@
 # Databricks notebook source
+# MAGIC %run ./variable_definition
+
+# COMMAND ----------
+
 # MAGIC %md
 # MAGIC 
 # MAGIC # Write data from Databricks to MySQL
@@ -52,6 +56,7 @@ maintenance_header_schema = StructType([
   ])
 
 maintenance_header_df = spark.createDataFrame(maintenance_data, maintenance_header_schema)
+maintenance_header_df.createOrReplaceTempView("maintenance_data_table")
 
 # COMMAND ----------
 
@@ -63,6 +68,7 @@ power_schema = StructType([
   ])
 
 power_df = spark.createDataFrame(power_data, power_schema).withColumn("window", F.unix_timestamp(F.col("window"),'yyyy-MM-dd HH:mm:ss').cast("timestamp"))
+power_df.createOrReplaceTempView("power_output_table")
 
 # COMMAND ----------
 
@@ -123,3 +129,11 @@ table = "power_output"
                       .option("password", password)
                       .save()
 )
+
+# COMMAND ----------
+
+spark.sql("""
+            SELECT count(*), GETDATE() AS last_write FROM power_output_table 
+            UNION ALL 
+            SELECT count(*), GETDATE() AS last_write FROM maintenance_data_table 
+          """).write.format("delta").mode("append").save(f"{path_to_landing_zone}/{database_name}/write_registrations")

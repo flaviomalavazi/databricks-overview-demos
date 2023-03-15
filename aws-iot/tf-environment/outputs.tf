@@ -50,3 +50,11 @@ output "aws_services_role_arn" {
 output "aws_services_role_name" {
   value = resource.aws_iam_role.aws_services_role.name
 }
+
+# output "databricks_sql_endoint_data_source_id" {
+#   value = resource.databricks_sql_endpoint.demo_sql_warehouse.id
+# }
+
+output "s3_id" {
+  value = module.demo_s3.s3_bucket_id
+}

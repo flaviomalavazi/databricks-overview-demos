@@ -1,5 +1,6 @@
 # In progress folders
 aws-airbyte/*
+tests/**
 
 # Local .terraform directories
 **/.terraform/**

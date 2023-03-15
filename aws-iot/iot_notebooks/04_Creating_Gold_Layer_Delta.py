@@ -12,8 +12,7 @@
 import time
 from pyspark.sql import functions as F
 
-df_turbine_sensor = ( spark.readStream.format('delta').option('ignoreChanges',True).table(f'hive_metastore.{target_database}.turbine_sensor_agg')
-  .withColumn("hour", F.date_format(F.col("window"), 'H:mm')) )
+df_turbine_sensor = ( spark.readStream.format('delta').option('ignoreChanges',True).table(f'hive_metastore.{target_database}.turbine_sensor_agg').withColumn("hour", F.date_format(F.col("window"), 'H:mm')) )
 df_maintenanceheader = spark.readStream.format('delta').option('ignoreChanges',True).table(f'hive_metastore.{target_database}_raw.maintenance_data')
 df_poweroutput = spark.readStream.format('delta').option('ignoreChanges',True).table(f'hive_metastore.{target_database}_raw.power_output')
 

@@ -1,4 +1,43 @@
+data "external" "get_role" {
+  program = ["bash", "../../modules/iam_role_checker/iam_role.sh"]
+  query = {
+    role_name   = local.aws_access_services_role_name
+    aws_profile = var.aws_profile
+  }
+}
+
+data "aws_iam_policy_document" "assume_role_for_ec2_bootstrap" {
+  count = data.external.get_role.result.message != local.aws_access_services_role_name ? 1 : 0
+  statement {
+    sid     = "AllowEC2ToAssumeRole"
+    effect  = "Allow"
+    actions = ["sts:AssumeRole"]
+    principals {
+      identifiers = ["ec2.amazonaws.com"]
+      type        = "Service"
+    }
+  }
+
+  statement {
+    sid     = "AllowUnityCatalogToAssumeRole"
+    effect  = "Allow"
+    actions = ["sts:AssumeRole"]
+    principals {
+      type = "AWS"
+      identifiers = [
+      "arn:aws:iam::414351767826:role/unity-catalog-prod-UCMasterRole-14S5ZJVKOTYTL"]
+    }
+    condition {
+      test     = "StringEquals"
+      variable = "sts:ExternalId"
+      values   = [var.databricks_account_id]
+    }
+  }
+
+}
+
 data "aws_iam_policy_document" "assume_role_for_ec2" {
+  count = data.external.get_role.result.message == local.aws_access_services_role_name ? 1 : 0
   statement {
     sid     = "AllowEC2ToAssumeRole"
     effect  = "Allow"
@@ -29,9 +68,9 @@ data "aws_iam_policy_document" "assume_role_for_ec2" {
 }
 
 resource "aws_iam_role" "aws_services_role" {
-  name               = "${local.aws_access_services_role_name}"
+  name               = local.aws_access_services_role_name
   description        = "Shared Role to access other AWS Services (s3, Kinesis...)"
-  assume_role_policy = data.aws_iam_policy_document.assume_role_for_ec2.json
+  assume_role_policy = try(data.aws_iam_policy_document.assume_role_for_ec2[0].json, false) != false ? data.aws_iam_policy_document.assume_role_for_ec2[0].json : data.aws_iam_policy_document.assume_role_for_ec2_bootstrap[0].json
   tags               = local.tags
 }
 
@@ -39,12 +78,12 @@ resource "aws_iam_role" "aws_services_role" {
 data "aws_iam_policy_document" "aws_services_role_policy_document" {
   # Allows read and put to Kinesis streams
   statement {
-    sid       = "allowInteractionWithKinesis"
-    effect    = "Allow"
-    actions   = ["kinesis:Get*",
-    "kinesis:DescribeStream",
-    "kinesis:ListShards",
-    "kinesis:PutRecord",
+    sid    = "allowInteractionWithKinesis"
+    effect = "Allow"
+    actions = ["kinesis:Get*",
+      "kinesis:DescribeStream",
+      "kinesis:ListShards",
+      "kinesis:PutRecord",
     "kinesis:PutRecords"]
     resources = [module.demo_kinesis.kinesis_stream_arn]
   }

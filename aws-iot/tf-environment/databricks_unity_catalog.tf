@@ -29,7 +29,7 @@ resource "databricks_grants" "external_creds_grants" {
 resource "databricks_external_location" "landing" {
   provider        = databricks.workspace
   name            = "landing_zone"
-  url             = "s3://${module.demo_s3.s3_bucket_id}/landing"
+  url             = "s3://${module.demo_s3.s3_bucket_id}/landing/${var.db_name}/"
   credential_name = databricks_storage_credential.external.id
   comment         = "Managed by TF"
   depends_on = [

@@ -1,6 +1,9 @@
 resource "databricks_secret_scope" "rds" {
   provider = databricks.workspace
   name     = "rds_scope"
+  depends_on = [
+    module.databricks_workspace
+  ]
 }
 
 resource "databricks_secret_acl" "rds_acl" {
@@ -51,6 +54,9 @@ resource "databricks_secret" "rds_password" {
 resource "databricks_secret_scope" "kinesis" {
   provider = databricks.workspace
   name     = "kinesis_scope"
+  depends_on = [
+    module.databricks_workspace
+  ]
 }
 
 resource "databricks_secret_acl" "kinesis_acl" {
@@ -81,6 +87,9 @@ resource "databricks_secret" "stream_name" {
 resource "databricks_secret_scope" "s3_scope" {
   provider = databricks.workspace
   name     = "demo_s3"
+  depends_on = [
+    module.databricks_workspace
+  ]
 }
 
 resource "databricks_secret_acl" "s3_acl" {

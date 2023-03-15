@@ -74,3 +74,13 @@ module "demo_rds" {
   vpc_security_group_ids = module.aws_base.security_group_ids
 }
 
+# module "iot_dashboards" {
+#   source = "../iot_dashboards/"
+#   providers = {
+#     databricks = databricks.workspace
+#   }
+#   warehouse_data_source_id = resource.databricks_sql_endpoint.demo_sql_warehouse.id
+#   depends_on = [
+#     resource.databricks_sql_endpoint.demo_sql_warehouse
+#   ]
+# }
