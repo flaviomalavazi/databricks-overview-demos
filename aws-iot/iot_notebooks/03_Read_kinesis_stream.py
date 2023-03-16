@@ -67,7 +67,7 @@ initial_position
 
   kinesis_stream_options = {
     "streamName": dbutils.secrets.get("kinesis_scope", "kinesis_stream_name"),
-    "region": "us-west-1",
+    "region": dbutils.secrets.get("kinesis_scope", "kinesis_stream_region"),
     "initialPosition": initial_position
 }
 

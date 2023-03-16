@@ -27,11 +27,16 @@ resource "aws_route" "rds_to_db" {
   vpc_peering_connection_id = resource.aws_vpc_peering_connection.this.id
 }
 
-resource "aws_security_group_rule" "example" {
+resource "aws_security_group_rule" "this" {
   type              = "ingress"
   cidr_blocks       = [var.cidr_block]
   to_port           = 3306
   from_port         = 3306
   protocol          = "tcp"
   security_group_id = module.demo_rds.security_group_ids[0]
+
+  lifecycle {
+    prevent_destroy = true
+  }
+
 }

@@ -2,14 +2,11 @@
 import boto3
 import json
 from datetime import datetime, timedelta
-import logging
-from random import randint, random, gauss, choice
+from random import gauss, choice
 from uuid import uuid4
 from typing import List
 from time import sleep
 
-logger = logging.getLogger()
-logging.basicConfig(level=logging.INFO)
 
 
 # COMMAND ----------
@@ -74,7 +71,7 @@ class kinesisProducer():
 
 # COMMAND ----------
 
-kinesis = kinesisProducer(stream_name = dbutils.secrets.get("kinesis_scope", "kinesis_stream_name"), region_name = "us-west-1")
+kinesis = kinesisProducer(stream_name = dbutils.secrets.get("kinesis_scope", "kinesis_stream_name"), region_name = dbutils.secrets.get("kinesis_scope", "kinesis_stream_region"))
 
 # COMMAND ----------
 

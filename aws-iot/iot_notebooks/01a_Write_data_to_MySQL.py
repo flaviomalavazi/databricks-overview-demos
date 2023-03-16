@@ -133,7 +133,7 @@ table = "power_output"
 # COMMAND ----------
 
 spark.sql("""
-            SELECT count(*), GETDATE() AS last_write FROM power_output_table 
+            SELECT count(*) as synced_rows, GETDATE() AS last_write FROM power_output_table 
             UNION ALL 
-            SELECT count(*), GETDATE() AS last_write FROM maintenance_data_table 
+            SELECT count(*) as synced_rows, GETDATE() AS last_write FROM maintenance_data_table 
           """).write.format("delta").mode("append").save(f"{path_to_landing_zone}/{database_name}/write_registrations")

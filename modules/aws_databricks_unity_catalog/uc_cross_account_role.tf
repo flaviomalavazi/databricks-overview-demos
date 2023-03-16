@@ -29,6 +29,7 @@ data "aws_iam_policy_document" "passrole_for_uc" {
 }
 
 resource "aws_iam_policy" "unity_metastore" {
+  name = "${var.prefix}-unity-catalog-metastore-access-iam-policy"
   policy = jsonencode({
     Version = "2012-10-17"
     Id      = "${var.prefix}-databricks-unity-metastore"
@@ -58,6 +59,7 @@ resource "aws_iam_policy" "unity_metastore" {
 
 // Required, in case https://docs.databricks.com/data/databricks-datasets.html are needed
 resource "aws_iam_policy" "sample_data" {
+  name = "${var.prefix}-unity-catalog-sample-data-access"
   policy = jsonencode({
     Version = "2012-10-17"
     Id      = "${var.prefix}-databricks-sample-data"

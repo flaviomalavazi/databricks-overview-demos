@@ -83,6 +83,12 @@ resource "databricks_secret" "stream_name" {
   scope        = databricks_secret_scope.kinesis.id
 }
 
+resource "databricks_secret" "stream_region" {
+  provider     = databricks.workspace
+  key          = "kinesis_stream_region"
+  string_value = var.region
+  scope        = databricks_secret_scope.kinesis.id
+}
 
 resource "databricks_secret_scope" "s3_scope" {
   provider = databricks.workspace

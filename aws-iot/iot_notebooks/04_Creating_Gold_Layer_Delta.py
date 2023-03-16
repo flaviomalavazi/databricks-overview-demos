@@ -49,7 +49,7 @@ INNER JOIN power_output_streaming power
 
 # COMMAND ----------
 
-display(df_gold_turbine)
+# display(df_gold_turbine)
 
 # COMMAND ----------
 
@@ -95,4 +95,4 @@ while True:
 
 # COMMAND ----------
 
-spark.sql(f"select * from {target_database}.turbine_gold").display()
+spark.sql(f"select * from {target_database}.turbine_gold").limit(10).display()

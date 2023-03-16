@@ -82,10 +82,17 @@ data "aws_iam_policy_document" "aws_services_role_policy_document" {
     effect = "Allow"
     actions = ["kinesis:Get*",
       "kinesis:DescribeStream",
-      "kinesis:ListShards",
       "kinesis:PutRecord",
     "kinesis:PutRecords"]
     resources = [module.demo_kinesis.kinesis_stream_arn]
+  }
+
+  statement {
+    sid    = "allowKinesisListShards"
+    effect = "Allow"
+    actions = [
+    "kinesis:ListShards"]
+    resources = ["arn:aws:kinesis:*"]
   }
 
   statement {
