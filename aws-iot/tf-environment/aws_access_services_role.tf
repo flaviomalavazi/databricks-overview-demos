@@ -33,7 +33,6 @@ data "aws_iam_policy_document" "assume_role_for_ec2_bootstrap" {
       values   = [var.databricks_account_id]
     }
   }
-
 }
 
 data "aws_iam_policy_document" "assume_role_for_ec2" {
@@ -62,6 +61,23 @@ data "aws_iam_policy_document" "assume_role_for_ec2" {
       test     = "StringEquals"
       variable = "sts:ExternalId"
       values   = [var.databricks_account_id]
+    }
+  }
+
+  statement {
+    sid     = "serverlessAssumeRole"
+    effect  = "Allow"
+    actions = ["sts:AssumeRole"]
+    principals {
+      type        = "AWS"
+      identifiers = ["arn:aws:iam::790110701330:role/serverless-customer-resource-role"]
+    }
+    condition {
+      test     = "StringEquals"
+      variable = "sts:ExternalId"
+      values = [
+        "databricks-serverless-${module.databricks_workspace.databricks_workspace_id}"
+      ]
     }
   }
 
