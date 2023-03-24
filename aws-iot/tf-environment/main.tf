@@ -1,12 +1,14 @@
 module "aws_base" {
   providers = {
-    databricks = databricks.mws
+    databricks.mws = databricks.mws
   }
-  source     = "../../modules/aws_databricks_base"
-  tags       = local.tags
-  prefix     = local.prefix
-  cidr_block = var.cidr_block
-  region     = var.region
+  source                = "../../modules/aws_databricks_base"
+  tags                  = local.tags
+  prefix                = local.prefix
+  cidr_block            = var.cidr_block
+  region                = var.region
+  databricks_account_id = var.databricks_account_id
+  roles_to_assume       = [local.aws_access_services_role_arn]
 }
 
 
@@ -22,7 +24,7 @@ module "databricks_workspace" {
   vpc_private_subnets    = module.aws_base.subnets
   vpc_id                 = module.aws_base.vpc_id
   root_storage_bucket    = module.aws_base.root_bucket
-  cross_account_role_arn = resource.aws_iam_role.cross_account_role.arn
+  cross_account_role_arn = module.aws_base.cross_account_role_arn
   prefix                 = local.prefix
   tags                   = local.tags
   depends_on = [

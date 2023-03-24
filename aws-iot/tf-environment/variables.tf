@@ -48,7 +48,6 @@ variable "databricks_sp_name" {
   description = "(Required) Databricks Service Principal name"
 }
 
-
 variable "databricks_account_id" {
   type        = string
   description = "(Required) Databricks Account ID"
