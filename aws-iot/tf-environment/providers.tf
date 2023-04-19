@@ -1,28 +1,3 @@
-terraform {
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "4.48.0"
-    }
-
-    random = {
-      source  = "hashicorp/random"
-      version = "3.4.1"
-    }
-
-    time = {
-      source  = "hashicorp/time"
-      version = "0.9.1"
-    }
-
-    databricks = {
-      source  = "databricks/databricks"
-      version = "1.7.0"
-    }
-
-  }
-}
-
 provider "aws" {
   region  = var.region
   profile = var.aws_profile
@@ -30,6 +5,15 @@ provider "aws" {
 
 // initialize provider in normal mode
 provider "databricks" {
+  alias         = "mws"
+  account_id    = var.databricks_account_id
+  host          = "https://accounts.cloud.databricks.com"
+  client_id     = var.databricks_sp_oauth_client_id
+  client_secret = var.databricks_sp_oauth_secret
+}
+
+provider "databricks" {
+  alias = "workspace"
   host  = module.databricks_workspace.databricks_host
   token = module.databricks_workspace.databricks_token
 }
